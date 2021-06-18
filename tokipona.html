@@ -136,7 +136,7 @@ th{
     }
     
     var dictionary=[];
-    var url="https://raw.githubusercontent.com/osama-khalid/LanguageGame/main/dictionary_final.csv";
+    var url="https://raw.githubusercontent.com/osama-khalid/LanguageGame/main/dictionary_.csv";
     function httpGet(theUrl)
     {
         var xmlHttp = new XMLHttpRequest();
@@ -151,7 +151,7 @@ th{
     for (k=0;k<text.length;k++) {
         row = text[k].split('\t');
         
-        dictionary[row[0]]=''+row[1].replace('|',':').replace('|',':').replace('|',':').replace('|',':').replace('<br>','\n').replace('<br>','\n').replace('<br>','\n').replace('<br>','\n')
+        dictionary[row[0]]=row[1]//.replace('<br>','\n').replace('<br>','\n').replace('<br>','\n').replace('<br>','\n')
     }    
 var candidateSol=''    
 var count=0
