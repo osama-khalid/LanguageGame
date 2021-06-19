@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)http://osamakhalid.org/tokipona.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="viewport" content="width=device-width, initial-scale=5">
+
+   
+
+<style>
+    
+.dropbtn {
+  background-color: #3498DB;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+.hide {
+  display: none;
+}
+th{
+    font-weight: normal;
+}
+.myDIV:hover + .hide {
+  display: block;
+  color: red;
+   width: 125px;
+  height: 125px;
+  overflow: visible;
+}
+
+.test{
+  display: block;
+     width: 125px;
+  height: 15px;
+ 
+}
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+    
+
+.dropdown-content {
+  display: none;
+  position: relative;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.first{
+  position: relative;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+
+
+}
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+<title>Still Untitled</title>
+</style>
+</head>
+<body onload()="">
+<center>
+<h2>Untitled Language Game</h2>
+<h4>Translate the <a href="https://tokipona.org/">Toki Pona</a> phrases into English</h4>
+<div><b>Toki Pona</b> is a <a href="https://en.wikipedia.org/wiki/Constructed_language">conlang</a> with a base vocabulary of 123 words. <br></div>
+<div>Identify the English Word based on its <b>Toki Pona</b> definition. <br></div>
+<br>
+<div><b>Hint: </b>Hover over the Toki Pona text!</div>
+<br>
+<div class="container" id="remainder"><b>Remaining: </b>9<br></div>
+<div class="container" id="score"><b>Score: </b>0/100<br></div> <br>
+
+<div class="container" id="timeleft"><b>Time Left:</b> 43 seconds.</div> <br><div class="container" id="blanks">s n  _  _ <br><br></div>
+   
+    <div class="container" id="tokiTranslate"><b>Translate: </b>kon seli<br></div>
+
+    <div class="first" id="tokiPhrase"><center><table><tbody><tr><th><div class="myDIV"><div class="test">kon </div></div><a class="hide">NOUN: air, breath; essence, spirit; hidden reality, unseen agent</a></th><th><div class="myDIV"><div class="test">seli </div></div><a class="hide">ADJECTIVE: fire; cooking element, chemical reaction, heat source</a></th></tr></tbody></table></center><br><br></div>
+
+<div class="container" id="lookup"><input id="token" placeholder="" value=""><br><br><button id="btn" onclick="searchWord()"> Enter&nbsp;&nbsp;</button><button id="btn1" onclick="getWord1()"> Skip</button> <br></div><table>
+  <tbody><tr>
+      
+</tr>
+</tbody></table>
+    
+    
+<p id="result"></p>   
+
+
+
+</center>
+<script>
+    
+    function start(){
+        getWord()
+        var myobj = document.getElementById("setup");
+        myobj.remove();
+        document.getElementById("lookup").innerHTML="<input id='token' placeholder='' value=''><br><br><button id='btn' onclick='searchWord()'> Enter&nbsp;&nbsp;</button><button id='btn1' onclick='getWord1()'> Skip</button> <br>"
+;
+    
+    }
+    var candidateList=[];
+
+    var url="https://raw.githubusercontent.com/osama-khalid/LanguageGame/main/phrases.tsv";
+    function httpGet(theUrl)
+    {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+        xmlHttp.send( null );
+        return xmlHttp.responseText;
+    }
+
+    var rawText= httpGet(url);
+    candidateList=[];
+    var text=rawText.split('\n')
+    for (k=0;k<text.length;k++) {
+        row = text[k].split('\t');
+        candidateList.push(row)
+    }
+    
+    var dictionary=[];
+    var url="https://raw.githubusercontent.com/osama-khalid/LanguageGame/main/dictionary_final.csv";
+    function httpGet(theUrl)
+    {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+        xmlHttp.send( null );
+        return xmlHttp.responseText;
+    }
+
+    var rawText= httpGet(url);
+    
+    var text=rawText.split('\n')
+    for (k=0;k<text.length;k++) {
+        row = text[k].split('\t');
+        
+        dictionary[row[0]]=''+row[1].replace('|',':').replace('|',':').replace('|',':').replace('|',':').replace('<br>','\n').replace('<br>','\n').replace('<br>','\n').replace('<br>','\n')
+    }    
+var candidateSol=''    
+var count=0
+var score=0
+var blankFill=''
+var time=''
+function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
+var flag=0;   
+document.getElementById("remainder").innerHTML="<b>Remaining: </b>"+ '10'+'<br>';
+document.getElementById("score").innerHTML="<b>Score: </b>"+score+'/100'+'<br>';
+
+function searchWord(){
+    var elem=document.getElementById('token').value.trim();
+    var candidateWord=elem.toLowerCase()
+    if(candidateWord==candidateSol){
+        clearInterval(time);
+        document.getElementById('timeleft').innerHTML = '<b>Congrats! </b>"<b>'+elem+'</b>" is correct.';
+        document.getElementById("token").value="";
+        sub=60-TIMER
+        sub2=Math.floor((sub / 10));
+        score=score+10-sub2
+        console.log(sub)
+        console.log(sub2)
+        console.log(score)
+        
+        document.getElementById("score").innerHTML="<b>Score: </b>"+score+'/100'+'<br>';
+        ;
+        document.getElementById("blanks").innerHTML=elem.replace(' ',' - ')+"<br><br>"
+        document.getElementById("result").innerHTML='Congrats! "<b>' + elem+ '"</b> is correct.';
+          setTimeout(getWord, 1000);
+    }else{
+        document.getElementById("result").innerHTML='Sorry! <b>"' + elem+ '"</b> is not correct.';
+    }
+    
+}   
+var SOL=''
+var TIMER=60
+function getWord1(){
+  clearInterval(time);
+
+              document.getElementById('timeleft').innerHTML = '<b>Sorry!</b> The correct translation was <b>"'+SOL+'"</b>.'; 
+  setTimeout(getWord, 3000);
+
+}
+
+function getWord(){
+    count=count+1
+    document.getElementById("remainder").innerHTML="<b>Remaining: </b>"+(10-count)+'<br>';    
+    solution=''
+    
+    document.getElementById("result").innerHTML=''
+    if (count>10){
+        displayScore()
+    }else{
+    
+
+        
+        randomIndex = Math.floor(Math.random() * candidateList.length);
+        candidatePhrase=candidateList[randomIndex]
+        //console.log(candidatePhrase[0])
+        solution=candidatePhrase[0]
+        //solution='builder'
+        wordSet=solution.split(' ')
+        candidateSol=solution
+        console.log(candidateSol)
+        str=''
+        //solution='to sol'
+        i=0
+  
+            str=solution[0]+' '
+            blankFill=solution[0]
+            i=1
+  
+        for (i;i<solution.length;i++){
+            if (solution[i]==' '){
+                str=str+'  -  '
+                blankFill=str+' - '
+            }else{
+                str=str+' _ '
+                blankFill=' '+solution[i]+' '
+                
+            }
+        }
+        tentativeWord=str
+        tokiPona=candidatePhrase[1].replace('( ','(').replace(' )',')')
+        tokiPonaWordList=tokiPona.split(' ')
+        SOL=solution;
+
+        //style="display: inline"
+        TPstr='<table><tr>'
+        for (i=0;i<tokiPonaWordList.length;i++){
+            word=tokiPonaWordList[i].replace('(','').replace(')','')
+            if(word in dictionary){
+                //TPstr=TPstr+'<a  title="'+dictionary[word]+'">'+tokiPonaWordList[i]+' </a>'
+                
+                TPstr=TPstr+'<th><div class="myDIV" ><div class="test">'+tokiPonaWordList[i]+' </div></div><a class="hide" >'+dictionary[word]+'</a></th>'
+            }else{
+                count=count-1
+                getWord()
+                
+            }
+        }
+        TPstr=TPstr+'</tr></table>'
+        //console.log(tokiPonaWordList)
+        document.getElementById("blanks").innerHTML=tentativeWord+"<br><br>"
+        document.getElementById("tokiPhrase").innerHTML='<center>'+TPstr+"</center><br><br>"
+        document.getElementById("tokiTranslate").innerHTML="<b>Translate: </b>"+tokiPona+'<br>'
+
+        var sol=solution;
+        //document.getElementById('timeleft').innerHTML = "<b>Time Left:</b> " + seconds + " seconds.";
+        //document.getElementById("result").innerHTML="Sorry! The correct translation was "+sol+".";                
+        var timeleft = 60;
+        var timer = setInterval(function(){
+        if(timeleft <= 0){
+            clearInterval(timer);
+            document.getElementById('timeleft').innerHTML = '<b>Sorry!</b> The correct translation was <b>"'+sol+'"</b>.';
+            //sleep(1000)
+            //document.getElementById("result").innerHTML="Sorry! The correct translation was "+sol+".";    
+          setTimeout(getWord, 3000);
+        } else {
+          TIMER=timeleft
+            if (timeleft <= 50){
+                      i=0
+
+                        str=sol[i]+' '
+                        if (sol[i+1]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+1]+' '
+                        }
+                        i=i+2
+                    
+                    for (i;i<sol.length;i++){
+                        if (sol[i]==' '){
+                            str=str+'  -  '
+
+                        }else{
+                            str=str+' _ '
+
+                            
+                        }
+                    }
+                    tentativeWord=str
+              document.getElementById('blanks').innerHTML = tentativeWord+"<br><br>"
+            }
+
+            if (timeleft <= 40 && sol.length>3){
+                      i=0
+                        str=sol[i]+' '
+                        if (sol[i+1]==' '){
+                          str=str+'- '
+                        }else{                        
+                        str=str+sol[i+1]+' '
+                        }
+                        
+                        if (sol[i+2]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+2]+' '
+                        }
+                        i=i+3
+                    
+                    for (i;i<sol.length;i++){
+                        if (sol[i]==' '){
+                            str=str+'  -  '
+
+                        }else{
+                            str=str+' _ '
+
+                            
+                        }
+                    }
+                    tentativeWord=str
+              document.getElementById('blanks').innerHTML = tentativeWord+"<br><br>"
+            }
+
+            if (timeleft <= 30 && sol.length>4){
+                      i=0
+                        str=sol[i]+' '
+                        if (sol[i+1]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+1]+' '
+                        }
+                        if (sol[i+2]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+2]+' '
+                        }
+                        if (sol[i+3]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+3]+' '          
+                        }              
+                        i=i+4
+                    
+                    for (i;i<sol.length;i++){
+                        if (sol[i]==' '){
+                            str=str+'  -  '
+
+                        }else{
+                            str=str+' _ '
+
+                            
+                        }
+                    }
+                    tentativeWord=str
+              document.getElementById('blanks').innerHTML = tentativeWord+"<br><br>"
+            }
+
+
+            if (timeleft <= 20 && sol.length>5){
+              i=0
+                        str=sol[i]+' '
+                        if (sol[i+1]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+1]+' '
+                        }
+                        if (sol[i+2]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+2]+' '
+                        }
+                        if (sol[i+3]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+3]+' '          
+                        }          
+                        if (sol[i+4]==' '){
+                          str=str+'- '
+                        }else{                            
+                          str=str+sol[i+4]+' '          
+                        }                                      
+                        i=i+5
+                    
+                    for (i;i<sol.length;i++){
+                        if (sol[i]==' '){
+                            str=str+'  -  '
+
+                        }else{
+                            str=str+' _ '
+
+                            
+                        }
+                    }
+                    tentativeWord=str
+              document.getElementById('blanks').innerHTML = tentativeWord+"<br><br>"
+            }
+
+
+            if (timeleft <= 10 && sol.length>6){
+              i=0
+                        str=sol[i]+' '
+                        if (sol[i+1]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+1]+' '
+                        }
+                        if (sol[i+2]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+2]+' '
+                        }
+                        if (sol[i+3]==' '){
+                          str=str+'- '
+                        }else{                        
+                          str=str+sol[i+3]+' '          
+                        }          
+                        if (sol[i+4]==' '){
+                          str=str+'- '
+                        }else{                            
+                          str=str+sol[i+4]+' '          
+                        }          
+                        if (sol[i+5]==' '){
+                          str=str+'- '
+                        }else{                                                    
+                          str=str+sol[i+5]+' '          
+                        }                
+                        i=i+6
+                    
+                    for (i;i<sol.length;i++){
+                        if (sol[i]==' '){
+                            str=str+'  -  '
+
+                        }else{
+                            str=str+' _ '
+
+                            
+                        }
+                    }
+                    tentativeWord=str
+              document.getElementById('blanks').innerHTML = tentativeWord+"<br><br>"
+            }
+
+            document.getElementById('timeleft').innerHTML = "<b>Time Left:</b> " + timeleft + " seconds.";
+            time=timer;
+        }
+        timeleft -= 1;
+        }, 1000);
+    
+                
+
+    }
+    
+}
+    
+//function()
+
+function displayScore(){
+    
+    
+     var myobj = document.getElementById("token");
+  myobj.remove();
+    
+     var myobj = document.getElementById("btn");
+  myobj.remove();
+     var myobj = document.getElementById("btn1");
+  myobj.remove();  
+    
+     var myobj = document.getElementById("timeleft");
+  myobj.remove();
+    
+
+document.getElementById("score").innerHTML="";
+document.getElementById("remainder").innerHTML="";
+    
+document.getElementById("blanks").innerHTML="";
+    
+document.getElementById("tokiPhrase").innerHTML="";
+
+document.getElementById("tokiTranslate").innerHTML="";  
+document.getElementById("score").innerHTML="<b>Your Final Score was " +score+'/100</b>';
+    
+}
+</script>
+
+
+
+</body></html>
